@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>VINOM — Tarif Professionnel</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="print.css" media="print">
+</head>
+<body>
+
+<!-- =========== ÉCRAN DE GARDE (mot de passe) =========== -->
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <div class="gate-brand">VINOM</div>
+    <div class="gate-subtitle">Tarif Professionnel</div>
+    <div class="gate-rule"></div>
+    <p class="gate-text">Accès réservé aux clients et partenaires VINOM.</p>
+    <form id="gate-form" autocomplete="off">
+      <input type="password" id="gate-pwd" placeholder="Code d'accès" autocomplete="off">
+      <button type="submit">Entrer</button>
+    </form>
+    <p id="gate-error" class="gate-error" hidden>Code incorrect.</p>
+    <p class="gate-footer">Code à demander à votre commercial VINOM<br>ou à <a href="mailto:adv@vinom.fr">adv@vinom.fr</a></p>
+  </div>
+</div>
+
+<!-- =========== APP (cachée tant que pas authentifié) =========== -->
+<div id="app" class="app" hidden>
+
+  <!-- Header -->
+  <header class="app-header" role="banner">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-logo">VINOM</div>
+        <div class="brand-tagline">Tarif Professionnel · <span id="header-date">…</span></div>
+      </div>
+      <nav class="header-actions" aria-label="Actions principales">
+        <a href="https://nobullshitdrinks.github.io/vinom-promotions/" class="btn btn-link" target="_blank" rel="noopener">
+          <span class="btn-ico">★</span> Promotions
+        </a>
+        <button id="btn-print" class="btn btn-primary" type="button">
+          <span class="btn-ico">↓</span> Imprimer / PDF
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Barre de recherche + filtres -->
+  <section class="filters-bar" aria-label="Recherche et filtres">
+    <div class="search-row">
+      <div class="search-wrap">
+        <span class="search-ico" aria-hidden="true">⌕</span>
+        <input type="search" id="search" placeholder="Rechercher une cuvée, un domaine, une appellation…" autocomplete="off">
+        <button id="search-clear" class="search-clear" aria-label="Effacer la recherche" hidden>×</button>
+      </div>
+      <button id="btn-reset" class="btn btn-reset" type="button" title="Réinitialiser tous les filtres">
+        ⟲ Réinitialiser
+      </button>
+    </div>
+
+    <div class="filter-groups">
+      <div class="filter-group" data-group="couleur" data-mode="single">
+        <span class="filter-label">Couleur</span>
+        <button class="chip" data-value="rouge">Rouges <span class="chip-count"></span></button>
+        <button class="chip" data-value="blanc">Blancs <span class="chip-count"></span></button>
+        <button class="chip" data-value="rose">Rosés <span class="chip-count"></span></button>
+        <button class="chip" data-value="bulles">Bulles <span class="chip-count"></span></button>
+        <button class="chip" data-value="spiritueux">Spiritueux <span class="chip-count"></span></button>
+      </div>
+
+      <div class="filter-group" data-group="label" data-mode="multi">
+        <span class="filter-label">Label</span>
+        <button class="chip" data-value="bio">BIO <span class="chip-count"></span></button>
+        <button class="chip" data-value="biodynamie">Biodynamie/Demeter <span class="chip-count"></span></button>
+        <button class="chip" data-value="hve">HVE <span class="chip-count"></span></button>
+        <button class="chip" data-value="sans_so2">Sans SO₂ <span class="chip-count"></span></button>
+        <button class="chip" data-value="vegan">Vegan <span class="chip-count"></span></button>
+      </div>
+
+      <div class="filter-group" data-group="format" data-mode="multi">
+        <span class="filter-label">Format</span>
+        <button class="chip" data-value="standard">75cl <span class="chip-count"></span></button>
+        <button class="chip" data-value="magnum">Magnum <span class="chip-count"></span></button>
+        <button class="chip" data-value="bib">BIB <span class="chip-count"></span></button>
+        <button class="chip" data-value="demi">37,5cl <span class="chip-count"></span></button>
+      </div>
+
+      <div class="filter-group" data-group="mise_avant" data-mode="multi">
+        <span class="filter-label">Mise en avant</span>
+        <button class="chip chip-pepite" data-value="pepite">★ Pépites <span class="chip-count"></span></button>
+        <button class="chip chip-nouveau" data-value="nouveau">● Nouveautés <span class="chip-count"></span></button>
+      </div>
+
+      <div class="filter-group" data-group="prix" data-mode="single">
+        <span class="filter-label">Prix HT</span>
+        <button class="chip" data-value="0-10">&lt; 10 €</button>
+        <button class="chip" data-value="10-20">10–20 €</button>
+        <button class="chip" data-value="20-50">20–50 €</button>
+        <button class="chip" data-value="50-9999">50 € et +</button>
+      </div>
+
+      <div class="filter-group filter-group-region" data-group="region" data-mode="single">
+        <span class="filter-label">Région</span>
+        <div class="region-chips" id="region-chips"><!-- injecté en JS --></div>
+      </div>
+    </div>
+
+    <div class="results-bar">
+      <span id="results-count" class="results-count">…</span>
+      <div class="sort-wrap">
+        <label for="sort">Tri&nbsp;:</label>
+        <select id="sort">
+          <option value="region">Par région</option>
+          <option value="prix-asc">Prix croissant</option>
+          <option value="prix-desc">Prix décroissant</option>
+          <option value="domaine">Domaine A→Z</option>
+          <option value="nouveau">Nouveautés d'abord</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- Liste des références -->
+  <main id="results" class="results" aria-live="polite"><!-- injecté en JS --></main>
+
+  <!-- Empty state -->
+  <div id="empty" class="empty" hidden>
+    <div class="empty-ico">⌕</div>
+    <h2>Aucune référence ne correspond</h2>
+    <p>Essayez d'élargir votre recherche ou de retirer un filtre.</p>
+    <button class="btn btn-primary" onclick="resetAll()">⟲ Réinitialiser les filtres</button>
+  </div>
+
+  <!-- Pied -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-cell">
+        <div class="footer-title">Service ADV</div>
+        <div>01 85 56 84 50 · adv@vinom.fr</div>
+        <div>Lun–Ven · 9h–17h</div>
+      </div>
+      <div class="footer-cell">
+        <div class="footer-title">Comptabilité</div>
+        <div>01 85 56 84 52 · k.yazidi@vinom.fr</div>
+      </div>
+      <div class="footer-cell">
+        <div class="footer-title">VINOM SAS</div>
+        <div>13 boulevard des Batignolles, 75008 Paris</div>
+      </div>
+      <div class="footer-cell footer-legal">
+        L'abus d'alcool est dangereux pour la santé.<br>À consommer avec modération.
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- =========== TEMPLATE PRINT (générée à la volée par JS lors de window.print) =========== -->
+<div id="print-only" class="print-only"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

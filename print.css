@@ -1,0 +1,340 @@
+/* =================================================================
+   CSS PRINT — Reproduit le PDF V1
+   Quand l'utilisateur clique "Imprimer/PDF", on cache l'UI
+   et on affiche uniquement le contenu généré par JS dans #print-only
+   ================================================================= */
+
+@page {
+  size: A4;
+  margin: 18mm 16mm 22mm 16mm;
+  @bottom-left {
+    content: "VINOM — Tarif Professionnel";
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #8a8a8a;
+    letter-spacing: 0.05em;
+  }
+  @bottom-center {
+    content: counter(page) " / " counter(pages);
+    font-family: 'Inter', sans-serif;
+    font-size: 8pt;
+    color: #8a8a8a;
+  }
+  @bottom-right {
+    content: "L'abus d'alcool est dangereux pour la santé. À consommer avec modération.";
+    font-family: 'Inter', sans-serif;
+    font-style: italic;
+    font-size: 6.5pt;
+    color: #8a8a8a;
+  }
+}
+
+@page :first {
+  margin: 0;
+  @bottom-left { content: ""; }
+  @bottom-center { content: ""; }
+  @bottom-right { content: ""; }
+}
+
+/* Hide everything except print-only */
+body * { visibility: hidden; }
+#print-only, #print-only * { visibility: visible; }
+#print-only { display: block !important; position: static !important; }
+.app, .gate, .empty { display: none !important; }
+
+/* Print container reset */
+#print-only {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  color: #1a1a1a;
+  background: #fdfaf3;
+  font-size: 9pt;
+  line-height: 1.45;
+}
+
+/* =================================================================
+   COUVERTURE
+   ================================================================= */
+.p-cover {
+  page-break-after: always;
+  width: 210mm;
+  height: 297mm;
+  position: relative;
+  background: linear-gradient(160deg, #1A2F4A 0%, #1A2F4A 35%, #5a1620 75%, #7a1f2b 100%);
+  color: #fdfaf3;
+  margin: 0;
+  padding: 28mm 22mm 22mm 22mm;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  display: flex;
+  flex-direction: column;
+}
+
+.p-cover-eyebrow {
+  font-size: 8.5pt;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: #b8923a;
+  margin-bottom: 8mm;
+  font-weight: 500;
+}
+
+.p-cover-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 84pt;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 0.95;
+  margin: 0 0 8mm 0;
+}
+
+.p-cover-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18pt;
+  font-weight: 400;
+  color: rgba(253,250,243,0.85);
+  letter-spacing: 0.04em;
+  margin-bottom: 14mm;
+}
+
+.p-cover-divider {
+  width: 60mm;
+  height: 1px;
+  background: rgba(184,146,58,0.5);
+  margin-bottom: 8mm;
+}
+
+.p-cover-meta {
+  font-size: 10pt;
+  color: rgba(253,250,243,0.7);
+  line-height: 1.7;
+  margin-bottom: 14mm;
+}
+
+.p-cover-meta strong {
+  color: #fdfaf3;
+  font-weight: 500;
+}
+
+.p-cover-edito {
+  border-left: 2px solid #b8923a;
+  padding: 4mm 0 4mm 8mm;
+  max-width: 145mm;
+}
+
+.p-cover-edito-title {
+  font-size: 9pt;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #b8923a;
+  margin-bottom: 4mm;
+  font-weight: 500;
+}
+
+.p-cover-edito-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11.5pt;
+  line-height: 1.6;
+  font-style: italic;
+  color: rgba(253,250,243,0.92);
+  margin: 0 0 3mm 0;
+}
+
+.p-cover-edito-signature {
+  font-size: 9pt;
+  color: #b8923a;
+  letter-spacing: 0.05em;
+}
+
+.p-cover-footer {
+  margin-top: auto;
+  padding-top: 6mm;
+  border-top: 1px solid rgba(253,250,243,0.15);
+  font-style: italic;
+  font-size: 7.5pt;
+  color: rgba(253,250,243,0.55);
+  max-width: 110mm;
+  line-height: 1.4;
+}
+
+.p-cover-filter-info {
+  background: rgba(184,146,58,0.15);
+  padding: 4mm 6mm;
+  margin-top: 6mm;
+  font-size: 9pt;
+  color: rgba(253,250,243,0.85);
+  border-left: 2px solid #b8923a;
+}
+
+/* =================================================================
+   PAGES RÉGION
+   ================================================================= */
+.p-region {
+  page-break-before: always;
+}
+
+.p-region-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-bottom: 4mm;
+  margin-bottom: 8mm;
+  border-bottom: 2px solid #1A2F4A;
+}
+
+.p-region-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32pt;
+  font-weight: 500;
+  color: #1A2F4A;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin: 0;
+}
+
+.p-region-meta {
+  font-size: 9pt;
+  color: #8a8a8a;
+  font-style: italic;
+  text-align: right;
+}
+
+.p-region-meta strong {
+  color: #7a1f2b;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.p-subregion {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14pt;
+  font-weight: 500;
+  color: #7a1f2b;
+  margin: 5mm 0 2.5mm 0;
+  padding-left: 3mm;
+  border-left: 2.5px solid #b8923a;
+  font-style: italic;
+}
+
+.p-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4mm;
+  font-size: 8.5pt;
+}
+
+.p-table thead th {
+  text-align: left;
+  padding: 2mm 2mm 2mm 0;
+  border-bottom: 1.5px solid #1a1a1a;
+  font-size: 7pt;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.p-table tbody td {
+  padding: 2mm 2mm 2mm 0;
+  vertical-align: middle;
+  border-bottom: 1px solid #f0ece3;
+}
+
+.p-col-cuvee { width: 33%; font-weight: 500; }
+.p-col-domaine {
+  width: 24%;
+  color: #4a4a4a;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 10pt;
+}
+.p-col-appellation { width: 19%; color: #4a4a4a; font-size: 8pt; }
+.p-col-mill { width: 7%; color: #4a4a4a; text-align: center; font-variant-numeric: tabular-nums; font-size: 8pt; }
+.p-col-label { width: 7%; text-align: center; }
+.p-col-prix { width: 10%; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.p-table.spiri .p-col-cuvee { width: 35%; }
+.p-table.spiri .p-col-domaine { width: 28%; }
+.p-table.spiri .p-col-appellation { width: 18%; }
+.p-table.spiri .p-col-format { width: 9%; text-align: center; font-size: 8pt; }
+.p-table.spiri .p-col-prix { width: 10%; }
+
+.p-badge {
+  display: inline-block;
+  font-size: 6pt;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.5mm 1.4mm;
+  border-radius: 0.6mm;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 1.5mm;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.p-badge-bio { background: #2d6a3e; color: white; }
+.p-badge-hve { background: #6d8c3a; color: white; }
+.p-badge-biodynamie { background: #3b6a8c; color: white; }
+.p-badge-sans_so2 { background: #4a4a4a; color: white; }
+.p-badge-vegan { background: #5a3b8c; color: white; }
+.p-badge-regen { background: #2d6a3e; color: white; }
+.p-badge-new { background: #7a1f2b; color: white; }
+.p-badge-pepite { background: #b8923a; color: white; }
+.p-badge-format { background: #1A2F4A; color: white; }
+
+/* CGV page */
+.p-cgv {
+  page-break-before: always;
+}
+
+.p-cgv-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26pt;
+  font-weight: 500;
+  color: #1A2F4A;
+  margin: 0 0 8mm 0;
+}
+
+.p-info-block {
+  padding: 5mm;
+  background: #f6f1e6;
+  margin-bottom: 8mm;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.p-info-block h3 {
+  font-size: 8pt;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #1A2F4A;
+  margin: 0 0 3mm 0;
+  font-weight: 600;
+}
+
+.p-info-block p {
+  font-size: 8.5pt;
+  margin: 0 0 1.5mm 0;
+  color: #4a4a4a;
+}
+
+.p-cgv-content {
+  font-size: 7.5pt;
+  line-height: 1.55;
+  color: #4a4a4a;
+  text-align: justify;
+}
+
+.p-cgv-content h3 {
+  font-size: 8.5pt;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 4mm 0 1.5mm 0;
+}
+
+.p-cgv-content p { margin: 0 0 1.5mm 0; }
