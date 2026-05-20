@@ -114,7 +114,10 @@ function renderRegionFilter() {
   const container = document.getElementById('region-chips');
   const counts = {};
   for (const it of DATA.items) counts[it.region] = (counts[it.region] || 0) + 1;
-  const regionsOrdered = REGION_ORDER.filter(r => counts[r] > 0);
+  // Bulles et Spiritueux ne sont pas des régions géographiques : exclus du filtre
+  // (ils restent filtrables via la barre Couleur)
+  const NOT_REGIONS = new Set(['Bulles', 'Spiritueux']);
+  const regionsOrdered = REGION_ORDER.filter(r => counts[r] > 0 && !NOT_REGIONS.has(r));
   container.innerHTML = regionsOrdered.map(r => {
     return `<button class="chip" data-value="${r}">${r} <span class="chip-count">${counts[r]}</span></button>`;
   }).join('');
