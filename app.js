@@ -394,7 +394,7 @@ function renderTable(items, isSpiri, flat) {
         <th class="col-prix">Tarif HT</th>
       </tr></thead>
       <tbody>${items.map(it => `
-        <tr>
+        <tr class="cat-${it.couleur}">
           <td class="col-cuvee">${cuveeCellHTML(it)}</td>
           <td class="col-domaine">${escapeHtml(it.domaine)}</td>
           <td class="col-appellation">${escapeHtml(it.appellation)}</td>
@@ -415,7 +415,7 @@ function renderTable(items, isSpiri, flat) {
       <th class="col-prix">Tarif HT</th>
     </tr></thead>
     <tbody>${items.map(it => `
-      <tr>
+      <tr class="cat-${it.couleur}">
         <td class="col-cuvee">${cuveeCellHTML(it)}</td>
         <td class="col-domaine">${escapeHtml(it.domaine)}</td>
         <td class="col-appellation">${showRegion ? `<span style="color:#8a8a8a;font-size:11px">${it.region} · </span>` : ''}${escapeHtml(it.appellation)}</td>
@@ -691,7 +691,7 @@ function buildPrintTable(items, isSpiri) {
         <th class="p-col-prix">Tarif HT</th>
       </tr></thead>
       <tbody>${items.map(it => `
-        <tr>
+        <tr class="cat-${it.couleur}">
           <td class="p-col-cuvee">${printCuveeHTML(it)}</td>
           <td class="p-col-domaine">${escapeHtml(it.domaine)}</td>
           <td class="p-col-appellation">${escapeHtml(it.appellation)}</td>
@@ -710,7 +710,7 @@ function buildPrintTable(items, isSpiri) {
       <th class="p-col-prix">Tarif HT</th>
     </tr></thead>
     <tbody>${items.map(it => `
-      <tr>
+      <tr class="cat-${it.couleur}">
         <td class="p-col-cuvee">${printCuveeHTML(it)}</td>
         <td class="p-col-domaine">${escapeHtml(it.domaine)}</td>
         <td class="p-col-appellation">${escapeHtml(it.appellation)}</td>

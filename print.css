@@ -243,6 +243,27 @@ body * { visibility: hidden; }
   border-bottom: 1px solid #f0ece3;
 }
 
+/* Bande couleur à gauche pour chaque ligne (PDF) */
+.p-table tbody tr td:first-child {
+  position: relative;
+  padding-left: 3mm;
+}
+.p-table tbody tr td:first-child::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 1.2mm;
+  bottom: 1.2mm;
+  width: 1.2mm;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.p-table tbody tr.cat-rouge td:first-child::before { background: #7a1f2b; }
+.p-table tbody tr.cat-blanc td:first-child::before { background: #d4b54a; }
+.p-table tbody tr.cat-rose td:first-child::before { background: #e89a8e; }
+.p-table tbody tr.cat-bulles td:first-child::before { background: #c9a96e; }
+.p-table tbody tr.cat-spiritueux td:first-child::before { background: #5a5a5a; }
+
 .p-col-cuvee { width: 33%; font-weight: 500; }
 .p-col-domaine {
   width: 24%;
