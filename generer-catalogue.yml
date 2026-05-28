@@ -1,0 +1,58 @@
+name: Générer le catalogue VINOM
+
+# Déclenchement :
+#  - automatique quand le fichier Excel maître change dans data/
+#  - manuel via le bouton "Run workflow" (utile pour tester)
+on:
+  push:
+    paths:
+      - 'data/TarifVinom_Master.xlsx'
+  workflow_dispatch:
+
+# Permet au workflow d'écrire dans le dépôt (commit du tarif.json)
+permissions:
+  contents: write
+
+jobs:
+  generer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installer les dépendances
+        run: pip install openpyxl
+
+      - name: Générer tarif.json
+        run: |
+          # Le CSV Vinistoria est optionnel : s'il est présent, on l'utilise
+          # pour récupérer codes article + stock ; sinon le catalogue est
+          # généré sans ces infos (pas bloquant).
+          if [ -f "data/Articles_Vinistoria.csv" ]; then
+            VINI_ARG="--vinistoria data/Articles_Vinistoria.csv"
+          else
+            VINI_ARG=""
+            echo "Pas de fichier Vinistoria : génération sans matching stock."
+          fi
+          python scripts/generate_tarif.py \
+            --excel "data/TarifVinom_Master.xlsx" \
+            $VINI_ARG \
+            --output "tarif.json"
+
+      - name: Publier tarif.json (si modifié)
+        run: |
+          git config user.name "VINOM Catalogue Bot"
+          git config user.email "actions@github.com"
+          if git diff --quiet tarif.json; then
+            echo "Aucun changement dans tarif.json — rien à publier."
+          else
+            git add tarif.json
+            git commit -m "Mise à jour automatique du catalogue ($(date '+%Y-%m-%d %H:%M'))"
+            git push
+            echo "tarif.json mis à jour et publié."
+          fi
