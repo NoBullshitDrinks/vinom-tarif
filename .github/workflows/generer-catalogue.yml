@@ -18,10 +18,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Récupérer le dépôt
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Installer Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -30,18 +30,8 @@ jobs:
 
       - name: Générer tarif.json
         run: |
-          # Le CSV Vinistoria est optionnel : s'il est présent, on l'utilise
-          # pour récupérer codes article + stock ; sinon le catalogue est
-          # généré sans ces infos (pas bloquant).
-          if [ -f "data/Articles_Vinistoria.csv" ]; then
-            VINI_ARG="--vinistoria data/Articles_Vinistoria.csv"
-          else
-            VINI_ARG=""
-            echo "Pas de fichier Vinistoria : génération sans matching stock."
-          fi
           python scripts/generate_tarif.py \
             --excel "data/TarifVinom_Master.xlsx" \
-            $VINI_ARG \
             --output "tarif.json"
 
       - name: Publier tarif.json (si modifié)
