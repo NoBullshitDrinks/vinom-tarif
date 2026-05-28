@@ -43,6 +43,9 @@ jobs:
           else
             git add tarif.json
             git commit -m "Mise à jour automatique du catalogue ($(date '+%Y-%m-%d %H:%M'))"
+            # Récupère d'éventuels changements concurrents avant de pousser
+            # (évite l'erreur 'rejected / fetch first' si deux runs se chevauchent)
+            git pull --rebase --autostash origin main
             git push
             echo "tarif.json mis à jour et publié."
           fi
