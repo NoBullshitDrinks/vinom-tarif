@@ -57,7 +57,8 @@ COULEUR_NORM = {
 }
 
 # Garde-fou : on refuse de publier si trop peu de références (Excel cassé / mauvaise feuille)
-MIN_REFERENCES = 150
+# Le catalogue compte ~500 références ; en dessous de 400, on suspecte un problème.
+MIN_REFERENCES = 400
 
 EDITO_DEFAUT = (
     "À l'approche des beaux jours, votre carte des vins retrouve naturellement "
@@ -204,8 +205,12 @@ def read_master(path):
     items = []
     for row in rows[1:]:
         cuvee = get(row, "Cuvee")
+        domaine = get(row, "Domaine")
         prix_str = get(row, "Tarif_HT").replace(",", ".")
-        if not cuvee or not prix_str:
+        # Une référence est valide si elle a un nom (cuvée OU domaine) et un prix.
+        # Beaucoup de vins n'ont pas de cuvée distincte : leur nom = le domaine
+        # (ex. "Château Cheval Noir" en Saint-Émilion).
+        if (not cuvee and not domaine) or not prix_str:
             continue
         try:
             prix = float(prix_str)
@@ -216,7 +221,7 @@ def read_master(path):
 
         region = get(row, "Region")
         appellation = get(row, "Appellation")
-        couleur = deduce_couleur(get(row, "Couleur"), region, cuvee, appellation)
+        couleur = deduce_couleur(get(row, "Couleur"), region, cuvee or domaine, appellation)
         fmt, fmt_label = format_from_contenance(get(row, "Contenance_cl"))
         code = get(row, "Code_Vinistoria")
         stock_str = get(row, "Stock")
@@ -225,10 +230,17 @@ def read_master(path):
         except ValueError:
             stock = None
 
+        # Si pas de cuvée, on affiche le domaine comme libellé principal
+        # et on n'a pas de "domaine" séparé à répéter.
+        if cuvee:
+            cuvee_aff, domaine_aff = cuvee, domaine
+        else:
+            cuvee_aff, domaine_aff = domaine, ""
+
         items.append({
             "id": code or f"X{len(items):04d}",
-            "cuvee": cuvee,
-            "domaine": get(row, "Domaine"),
+            "cuvee": cuvee_aff,
+            "domaine": domaine_aff,
             "appellation": appellation,
             "millesime": get(row, "Millesime"),
             "label_display": get(row, "Label"),
