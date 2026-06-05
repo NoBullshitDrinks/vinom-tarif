@@ -1,12 +1,16 @@
 name: Générer le catalogue VINOM
 
 # Déclenchement :
-#  - automatique quand le fichier Excel maître change dans data/
+#  - automatique quand le fichier Excel maître OU le script change dans data/ ou scripts/
+#  - programmé chaque lundi (fait tomber les badges "Nouveau" expirés sans modif Excel)
 #  - manuel via le bouton "Run workflow" (utile pour tester)
 on:
   push:
     paths:
       - 'data/TarifVinom_Master.xlsx'
+      - 'scripts/generate_tarif.py'
+  schedule:
+    - cron: '0 6 * * 1'        # tous les lundis 06:00 UTC (~08h Paris l'été, 07h l'hiver)
   workflow_dispatch:
 
 # Permet au workflow d'écrire dans le dépôt (commit du tarif.json)
