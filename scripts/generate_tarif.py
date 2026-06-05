@@ -23,7 +23,7 @@ Conçu pour tourner en CI (GitHub Actions) sans supervision :
 import argparse
 import json
 import sys
-from datetime import date
+from datetime import date, datetime
 
 import openpyxl
 
@@ -60,6 +60,11 @@ COULEUR_NORM = {
 # Le catalogue compte ~500 références ; en dessous de 400, on suspecte un problème.
 MIN_REFERENCES = 400
 
+# Durée maximale d'affichage du badge "Nouveau" (consigne Olivier : 2 mois max).
+# Le badge tombe automatiquement passé ce délai, calculé depuis Date_ajout.
+# L'Excel peut conserver Statut=Nouveau : c'est ce script qui décide de l'afficher.
+NOUVEAU_DUREE_JOURS = 60
+
 EDITO_DEFAUT = (
     "À l'approche des beaux jours, votre carte des vins retrouve naturellement "
     "des allures ensoleillées. C'est la saison idéale pour redécouvrir nos rosés "
@@ -88,6 +93,29 @@ def cell_str(v):
     if isinstance(v, float) and v.is_integer():
         return str(int(v))
     return str(v).strip()
+
+
+def parse_date(v):
+    """Convertit une cellule Date_ajout en objet date (ou None si vide/illisible).
+    Gère les vrais types date/datetime d'Excel et les chaînes (ISO ou JJ/MM/AAAA)."""
+    if v is None or v == "":
+        return None
+    if isinstance(v, datetime):
+        return v.date()
+    if isinstance(v, date):
+        return v
+    s = str(v).strip()
+    if not s:
+        return None
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d %H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt).date()
+        except ValueError:
+            continue
+    try:
+        return date.fromisoformat(s[:10])
+    except Exception:
+        return None
 
 
 def deduce_couleur(couleur_brute, region, cuvee, appellation):
@@ -192,6 +220,10 @@ def read_master(path):
         i = idx.get(col)
         return cell_str(row[i]) if i is not None and i < len(row) else ""
 
+    def get_raw(row, col):
+        i = idx.get(col)
+        return row[i] if i is not None and i < len(row) else None
+
     # Lire l'édito depuis la feuille Edito si présente
     edito = EDITO_DEFAUT
     edition_label = ""
@@ -201,6 +233,9 @@ def read_master(path):
             # colonnes attendues : Mois | Titre | Texte
             if len(ed[1]) >= 3 and ed[1][2]:
                 edito = cell_str(ed[1][2])
+
+    today = date.today()
+    n_nouv_actif = n_nouv_expire = n_nouv_sans_date = 0
 
     items = []
     for row in rows[1:]:
@@ -237,6 +272,18 @@ def read_master(path):
         else:
             cuvee_aff, domaine_aff = domaine, ""
 
+        # Badge "Nouveau" : actif seulement si Statut=Nouveau ET Date_ajout < 60 jours.
+        date_ajout = parse_date(get_raw(row, "Date_ajout"))
+        est_nouveau = False
+        if get(row, "Statut").lower() == "nouveau":
+            if date_ajout is None:
+                n_nouv_sans_date += 1          # sécurité : pas de date -> pas de badge
+            elif (today - date_ajout).days <= NOUVEAU_DUREE_JOURS:
+                est_nouveau = True
+                n_nouv_actif += 1
+            else:
+                n_nouv_expire += 1             # > 60 j -> badge retiré automatiquement
+
         items.append({
             "id": code or f"X{len(items):04d}",
             "cuvee": cuvee_aff,
@@ -251,13 +298,17 @@ def read_master(path):
             "couleur": couleur,
             "format": fmt,
             "format_label": fmt_label,
-            "nouveau": get(row, "Statut").lower() == "nouveau",
+            "nouveau": est_nouveau,
+            "date_ajout": date_ajout.isoformat() if date_ajout else "",
             "pepite": get(row, "Pepite").lower() in ("oui", "x", "true", "1"),
             "exclusivite": get(row, "Exclusivite").lower() in ("oui", "x", "true", "1"),
             "stock": stock,
         })
 
     log(f"{len(items)} références lues dans la feuille 'Tarif'.")
+    log(f"Nouveautés : {n_nouv_actif} affichées (<= {NOUVEAU_DUREE_JOURS} j) | "
+        f"{n_nouv_expire} expirées (badge retiré auto) | "
+        f"{n_nouv_sans_date} en 'Nouveau' sans Date_ajout (badge masqué).")
     return items, edition_label, edito
 
 
