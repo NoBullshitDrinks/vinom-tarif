@@ -359,3 +359,53 @@ body * { visibility: hidden; }
 }
 
 .p-cgv-content p { margin: 0 0 1.5mm 0; }
+
+
+/* =================================================================
+   ESPACES PARTENAIRES — impression
+   La page partenaire est une IMAGE (le contenu d'un PDF embarqué
+   ne s'imprimerait pas). Elle occupe toute la largeur utile.
+   ================================================================= */
+.p-sponsor-page {
+  page-break-before: always;
+  page-break-after: always;
+  break-before: page;
+  break-after: page;
+  text-align: center;
+}
+.p-sponsor-page img {
+  display: block;
+  width: 100%;
+  max-width: 178mm;      /* largeur utile : 210mm - marges 16+16 */
+  max-height: 253mm;     /* hauteur utile : 297mm - marges 18+22 */
+  height: auto;
+  margin: 0 auto;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.p-sponsor-banner {
+  margin: 0 0 6mm;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.p-sponsor-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 0.4pt solid #ddd6c8;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.p-sponsor-mention {
+  margin-top: 1.5mm;
+  font-size: 7pt;
+  font-style: italic;
+  color: #8a8a8a;
+  text-align: right;
+}
+
+/* Les commandes écran ne s'impriment jamais */
+.sponsor-banner-actions,
+.btn-sponsor,
+.sponsor-eyebrow { display: none !important; }

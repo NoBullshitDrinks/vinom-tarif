@@ -785,3 +785,98 @@ a:hover { text-decoration: underline; }
 
 /* =============== FONTS =============== */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+
+/* =================================================================
+   ESPACES PARTENAIRES (sponsors)
+   Page A4 partenaire au-dessus du bloc région + bandeau sous le titre.
+   Pour retirer : passer `actif: false` dans SPONSORS (app.js).
+   ================================================================= */
+.sponsor-page {
+  margin: 0 0 26px;
+}
+.sponsor-eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sponsor-eyebrow::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold, #c9a96e);
+}
+.sponsor-page-frame {
+  display: block;
+  max-width: 620px;           /* ~A4 lisible sans écraser la page */
+  margin: 0 auto;
+  border: 1px solid var(--line, #e8e2d8);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.sponsor-page-frame:hover {
+  box-shadow: 0 6px 22px rgba(0,0,0,0.16);
+  transform: translateY(-2px);
+}
+.sponsor-page-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sponsor-banner-wrap {
+  margin: 14px 0 4px;
+}
+.sponsor-banner {
+  display: block;
+  border: 1px solid var(--line, #e8e2d8);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sponsor-banner:hover {
+  border-color: var(--navy, #1a2f4a);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+}
+.sponsor-banner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.sponsor-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.btn-sponsor {
+  background: var(--navy, #1a2f4a);
+  color: #fff;
+  border: 1px solid var(--navy, #1a2f4a);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-sponsor:hover { background: #000; border-color: #000; }
+.sponsor-mention {
+  font-size: 11px;
+  font-style: italic;
+  color: var(--ink-mute);
+}
+
+@media (max-width: 760px) {
+  .sponsor-page-frame { max-width: 100%; }
+  .btn-sponsor { flex: 1 1 auto; text-align: center; }
+}

@@ -5,7 +5,28 @@
 // ---------- Config ----------
 const ACCESS_CODE = 'vinom2026';   // Mot de passe partagé (changement annuel)
 const GATE_KEY = 'vinom_tarif_unlocked';
-const PROMO_URL = 'https://nobullshitdrinks.github.io/vinom-promotions/';
+const PROMO_URL = 'https://nobullshitdrinks.github.io/vinom-promos/';
+
+// ---------- Espaces partenaires (sponsors) ----------
+// Un sponsor s'affiche AU-DESSUS de sa région : page A4 pleine (écran + impression)
+// puis bandeau sous le titre de région. Passer `actif: false` pour le retirer.
+const SPONSORS = [
+  {
+    id: 'louis-latour',
+    actif: true,
+    region: 'Bourgogne',
+    nom: 'Maison Louis Latour',
+    libelle_court: 'Louis Latour',
+    periode: 'Octobre — Décembre 2026',
+    url: 'https://www.louislatour.com',
+    page: 'assets/louis-latour-page-bourgogne.jpg',      // A4 210x297 rognée aux traits de coupe, 200 dpi
+    bandeau: 'assets/louis-latour-bandeau-1200x120.png',
+    recherche: 'Louis Latour',
+  },
+];
+function sponsorFor(region) {
+  return SPONSORS.find(s => s.actif && s.region === region) || null;
+}
 
 // ---------- État ----------
 let DATA = null;
@@ -359,12 +380,16 @@ function renderByRegion(items) {
     const total = Object.values(subs).reduce((acc, arr) => acc + arr.length, 0);
     const nouveaux = Object.values(subs).flat().filter(it => it.nouveau).length;
 
+    const sponsor = sponsorFor(reg);
+    if (sponsor) html += renderSponsorPage(sponsor);
+
     html += `<section class="region-block">`;
     html += `<header class="region-block-head">`;
     html += `<h2 class="region-block-name">${reg}</h2>`;
     html += `<div class="region-block-meta"><strong>${total}</strong> référence${total>1?'s':''}`;
     if (nouveaux > 0) html += ` · dont <strong>${nouveaux}</strong> nouveauté${nouveaux>1?'s':''}`;
     html += `</div></header>`;
+    if (sponsor) html += renderSponsorBanner(sponsor);
 
     for (const sub of ordered) {
       const arr = subs[sub];
@@ -377,6 +402,31 @@ function renderByRegion(items) {
     html += `</section>`;
   }
   return html;
+}
+
+function renderSponsorPage(sp) {
+  return `<section class="sponsor-page" id="sponsor-${sp.id}">
+    <div class="sponsor-eyebrow">Espace partenaire · ${escapeHtml(sp.nom)} · ${escapeHtml(sp.periode)}</div>
+    <a class="sponsor-page-frame" href="${sp.url}" target="_blank" rel="noopener sponsored"
+       aria-label="${escapeHtml(sp.nom)} — ouvrir le site (nouvelle fenêtre)">
+      <img src="${sp.page}" alt="Page ${escapeHtml(sp.nom)}">
+    </a>
+  </section>`;
+}
+
+function renderSponsorBanner(sp) {
+  const actif = normalize(state.search) === normalize(sp.recherche);
+  return `<div class="sponsor-banner-wrap">
+    <a class="sponsor-banner" href="${sp.url}" target="_blank" rel="noopener sponsored"
+       aria-label="${escapeHtml(sp.nom)} — ouvrir le site (nouvelle fenêtre)">
+      <img src="${sp.bandeau}" width="1200" height="120" alt="${escapeHtml(sp.nom)}">
+    </a>
+    <div class="sponsor-banner-actions">
+      <button type="button" class="btn btn-sponsor" data-sponsor-filter="${sp.id}">${
+        actif ? '⟲ Afficher tout le tarif' : 'Voir les vins ' + escapeHtml(sp.libelle_court)}</button>
+      <span class="sponsor-mention">Page présentée par ${escapeHtml(sp.nom)}</span>
+    </div>
+  </div>`;
 }
 
 function renderFlat(items) {
@@ -467,6 +517,23 @@ function attachEvents() {
     refreshChips();
     render();
     // Scroll up doucement quand on filtre
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Bouton filtre d'un espace partenaire
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-sponsor-filter]');
+    if (!btn) return;
+    const sp = SPONSORS.find(s => s.id === btn.dataset.sponsorFilter);
+    if (!sp) return;
+    const input = document.getElementById('search');
+    const dejaActif = normalize(state.search) === normalize(sp.recherche);
+    state.search = dejaActif ? '' : sp.recherche;
+    input.value = state.search;
+    document.getElementById('search-clear').hidden = !state.search;
+    syncURL();
+    updateCounts();
+    render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
@@ -638,11 +705,24 @@ function buildPrintHTML() {
     const nouveaux = Object.values(subs).flat().filter(it => it.nouveau).length;
     const isSpiri = reg === 'Spiritueux';
 
+    const sponsor = sponsorFor(reg);
+    if (sponsor) {
+      html += `<section class="p-sponsor-page">
+        <img src="${sponsor.page}" alt="Page ${escapeHtml(sponsor.nom)}">
+      </section>`;
+    }
+
     html += `<section class="p-region">
       <div class="p-region-header">
         <h2 class="p-region-name">${reg}</h2>
         <div class="p-region-meta"><strong>${total}</strong> référence${total>1?'s':''}${nouveaux>0?`<br>dont <strong>${nouveaux}</strong> nouveauté${nouveaux>1?'s':''}`:''}</div>
       </div>`;
+    if (sponsor) {
+      html += `<div class="p-sponsor-banner">
+        <img src="${sponsor.bandeau}" alt="${escapeHtml(sponsor.nom)}">
+        <div class="p-sponsor-mention">Page présentée par ${escapeHtml(sponsor.nom)} · ${escapeHtml(sponsor.url.replace('https://',''))}</div>
+      </div>`;
+    }
 
     for (const sub of ordered) {
       const arr = subs[sub];
@@ -742,11 +822,34 @@ function printLabelBadge(item) {
   return '';
 }
 
+function attendreImages(racine, delaiMax) {
+  const imgs = Array.prototype.slice.call(racine.querySelectorAll('img'));
+  if (!imgs.length) return Promise.resolve();
+  const jobs = imgs.map(img => (img.complete && img.naturalWidth)
+    ? Promise.resolve()
+    : new Promise(res => {
+        img.addEventListener('load', res, { once: true });
+        img.addEventListener('error', res, { once: true });
+      }));
+  // Garde-fou : on n'attend jamais indéfiniment
+  return Promise.race([
+    Promise.all(jobs),
+    new Promise(res => setTimeout(res, delaiMax || 6000)),
+  ]);
+}
+
 function printPDF() {
   // Construire le DOM print
-  document.getElementById('print-only').innerHTML = buildPrintHTML();
-  // Lancer l'impression
-  setTimeout(() => window.print(), 50);
+  const host = document.getElementById('print-only');
+  host.innerHTML = buildPrintHTML();
+  // Les pages partenaires sont des images : sans cette attente, elles
+  // sortiraient blanches sur le PDF si elles ne sont pas encore décodées.
+  const btn = document.getElementById('btn-print');
+  if (btn) btn.disabled = true;
+  attendreImages(host, 6000).then(() => {
+    if (btn) btn.disabled = false;
+    setTimeout(() => window.print(), 50);
+  });
 }
 
 // =================================================================
